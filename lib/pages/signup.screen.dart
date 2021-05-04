@@ -79,6 +79,11 @@ class _SignUpState extends State<SignUp> {
                         print('Completed! Account registration called');
                         print(data);
                         if (data != null) {
+                          String token = data['login']['token'];
+
+                          //save the token to the provider
+                          context.read<AppData>().setToken(token);
+
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(
                                   'Account registration was successful!')));
@@ -223,6 +228,7 @@ class _SignUpState extends State<SignUp> {
                                   ),
                                 );
                               else {
+                                context.read<AppData>().setEmail(email);
                                 setState(() {
                                   _loading = true;
                                 });

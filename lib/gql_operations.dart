@@ -23,4 +23,23 @@ class GqlOperation {
         }
       }
   ''';
+
+  static final String SEND_VERIFICATION_CODE = ''' 
+    query sendCode(\$data: EmailInput) {
+      resendVerificationCode(data: \$data) 
+      
+    }
+  ''';
+
+  static final String VERIFY_CODE = '''
+    mutation verifyCode(\$data:VerifyUserInput) {
+      verifyUser(data:\$data){
+        token
+        user{
+          username
+          email
+        }
+      }
+    }
+  ''';
 }

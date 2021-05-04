@@ -3,8 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hagglex/config.dart';
 import 'package:hagglex/gql_operations.dart';
+import 'package:hagglex/view_models/app_data.model.dart';
 import 'package:hagglex/widgets/custom_button.dart';
 import 'package:hagglex/widgets/custom_textfield.dart';
+import 'package:provider/provider.dart';
 
 class Signin extends StatefulWidget {
   @override
@@ -22,11 +24,10 @@ class _SigninState extends State<Signin> {
     return Scaffold(
       backgroundColor: Color(0xFF271160),
       body: SafeArea(
-          child: Padding(
-        padding: EdgeInsets.all(24.0),
-        child: SingleChildScrollView(
-          child: GraphQLConsumer(
-            builder: (client) => Mutation(
+        child: Padding(
+          padding: EdgeInsets.all(24.0),
+          child: SingleChildScrollView(
+            child: Mutation(
               options: MutationOptions(
                 document: gql(GqlOperation.LOGIN_GQL_QUERY),
                 onCompleted: (data) {
@@ -35,11 +36,8 @@ class _SigninState extends State<Signin> {
                   if (data != null) {
                     String token = data['login']['token'];
 
-                    //adding the bearer token as part of the header for graphql
-                    AuthLink authLink =
-                        AuthLink(getToken: () => 'Bearer $token');
-                    client.link.concat(authLink);
-
+                    //save the token to the provider
+                    context.read<AppData>().setToken(token);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text('Account registration was successful!')));
                     Navigator.pushNamed(context, '/dashboard');
@@ -142,7 +140,7 @@ class _SigninState extends State<Signin> {
             ),
           ),
         ),
-      )),
+      ),
     );
   }
 }
