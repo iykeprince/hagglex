@@ -109,6 +109,7 @@ class _SigninState extends State<Signin> {
                         setState(() {
                           _loading = true;
                         });
+                        context.read<AppData>().setEmail(emailInput);
                         runMutation({
                           "data": {
                             "input": emailInput,

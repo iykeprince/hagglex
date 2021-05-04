@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:hagglex/config.dart';
 import 'package:hagglex/pages/country.screen.dart';
 import 'package:hagglex/pages/dashboard.screen.dart';
 import 'package:hagglex/pages/launcher.screen.dart';
@@ -19,28 +20,15 @@ void main() async {
   runApp(MyApp());
 }
 
-final HttpLink httpLink = HttpLink(
-  'https://hagglex-backend-staging.herokuapp.com/graphql',
-);
-
-ValueNotifier<GraphQLClient> client = ValueNotifier(
-  GraphQLClient(
-    link: httpLink,
-    cache: GraphQLCache(
-      store: HiveStore(),
-    ),
-  ),
-);
-
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
 
   @override
   Widget build(BuildContext context) {
-    return GraphQLProvider(
-      client: client,
-      child: ChangeNotifierProvider(
-        create: (context) => AppData(),
+    return ChangeNotifierProvider(
+      create: (context) => AppData(),
+      child: GraphQLProvider(
+        client: Config.initailizeClient(''),
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'HaggleX',

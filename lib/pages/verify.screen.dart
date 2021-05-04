@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:hagglex/config.dart';
 import 'package:hagglex/gql_operations.dart';
-import 'package:hagglex/main.dart';
 import 'package:hagglex/view_models/app_data.model.dart';
 import 'package:hagglex/widgets/custom_button.dart';
 import 'package:hagglex/widgets/custom_textfield.dart';
@@ -18,40 +17,35 @@ class _VerifyState extends State<Verify> {
   TextEditingController _codeController = TextEditingController();
   bool _loading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    AppData appData = Provider.of<AppData>(context, listen: false);
-
-    client.value.query(QueryOptions(
+  sendVerificationCode(GraphQLClient client, String email) {
+    client.query(QueryOptions(
       document: gql(GqlOperation.SEND_VERIFICATION_CODE),
       variables: {
-        "data": {"email": appData.email}
+        "data": {"email": email}
       },
+      pollInterval: Duration(seconds: 10),
     ));
-    print('hopefully it ran');
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Verification code sent!'),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     AppData appData = Provider.of<AppData>(context);
-    return Scaffold(
-      backgroundColor: Color(0xFF271160),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: GraphQLConsumer(
-            builder: (GraphQLClient client) {
-              client.link
-                  .concat(AuthLink(getToken: () => 'Bearer ${appData.token}'));
+    return GraphQLProvider(
+      client: Config.initailizeClient(appData.token),
+      child: Scaffold(
+        backgroundColor: Color(0xFF271160),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: GraphQLConsumer(builder: (client) {
+              sendVerificationCode(client, appData.email);
+
               return Mutation(
                 options: MutationOptions(
                   document: gql(GqlOperation.VERIFY_CODE),
+                  update: (cache, result) {
+                    print('Query result: ${result?.data}');
+                    print('Resutl: $result');
+                  },
                   onCompleted: (data) {
                     if (data != null) {
                       ScaffoldMessenger.of(context)
@@ -79,15 +73,18 @@ class _VerifyState extends State<Verify> {
                         decoration: BoxDecoration(
                             color: Colors.indigo.shade300,
                             borderRadius: BorderRadius.circular(16)),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 4.0,
-                            horizontal: 8.0,
-                          ),
-                          child: Icon(
-                            Icons.arrow_back_ios,
-                            size: 24,
-                            color: Colors.white,
+                        child: InkWell(
+                          onTap: () => Navigator.pop(context),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 4.0,
+                              horizontal: 8.0,
+                            ),
+                            child: Icon(
+                              Icons.arrow_back_ios,
+                              size: 24,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -146,7 +143,9 @@ class _VerifyState extends State<Verify> {
                               SizedBox(height: 10),
 
                               CustomButton(
-                                title: 'VERIFY ME',
+                                title: _loading
+                                    ? 'Verifying code...'
+                                    : 'VERIFY ME',
                                 color: CustomColor.kPrimaryColor,
                                 textColor: Colors.white,
                                 onPressed: _loading
@@ -177,10 +176,18 @@ class _VerifyState extends State<Verify> {
                               SizedBox(height: 16),
                               Text('This code will expire in 10 minutes'),
                               SizedBox(height: 24),
-                              Text(
-                                'Resend Code',
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
+                              InkWell(
+                                onTap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text('Code requested!')));
+                                  sendVerificationCode(client, appData.email);
+                                },
+                                child: Text(
+                                  'Resend Code',
+                                  style: TextStyle(
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
                             ],
@@ -191,7 +198,7 @@ class _VerifyState extends State<Verify> {
                   ),
                 ),
               );
-            },
+            }),
           ),
         ),
       ),

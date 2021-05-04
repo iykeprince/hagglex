@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 class AppData extends ChangeNotifier {
   String _country = '';
@@ -23,4 +24,10 @@ class AppData extends ChangeNotifier {
     _token = token;
     notifyListeners();
   }
+
+  final HttpLink _httpLink = HttpLink(
+    'https://hagglex-backend-staging.herokuapp.com/graphql',
+  );
+
+  HttpLink get httpLink => _httpLink;
 }

@@ -86,10 +86,12 @@ class _CountryItemState extends State<CountryItem> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-          Icon(
-            Icons.flag,
-            size: 30,
-            color: Colors.green,
+          SizedBox(
+            width: 24,
+            child: Image.asset(
+              'assets/flag.png',
+              fit: BoxFit.cover,
+            ),
           ),
           SizedBox(width: 16),
           Text(

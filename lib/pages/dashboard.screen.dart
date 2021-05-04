@@ -30,24 +30,11 @@ class _DashboardState extends State<Dashboard> {
               textColor: Colors.black,
               color: CustomColor.kGoldColor,
               onPressed: () {
-                setState(() {
-                  _loading = true;
-                });
-                Future.delayed(Duration(seconds: 5400), () {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    '/login',
-                    (route) => false,
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Logged out'),
-                    ),
-                  );
-                  setState(() {
-                    _loading = false;
-                  });
-                });
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                  (route) => false,
+                );
               },
             ),
           ],
